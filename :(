@@ -1,0 +1,144 @@
+local me = game.Players.LocalPlayer
+local root = me.Character and me.Character:FindFirstChild('HumanoidRootPart')
+if root then root.Anchored = true end
+local offset = Vector3.new(0, 0, 0)
+local origin = CFrame.new()
+local tool
+for _,v in ipairs(me:GetDescendants()) do if v.Name == 'SyncAPI' then tool = v.Parent break end end
+if not tool then for _,v in ipairs(game.ReplicatedStorage:GetDescendants()) do if v.Name == 'SyncAPI' then tool = v.Parent break end end end
+if not tool then warn('yo ur not have f3x') return end
+local syncApi = tool:FindFirstChild('SyncAPI')
+local remote = syncApi and syncApi:FindFirstChild('ServerEndpoint')
+if not remote then warn('no server endpoint found') return end
+local function _(args)
+    if not remote then return end
+    if remote:IsA('RemoteEvent') then
+        pcall(remote.FireServer, remote, unpack(args))
+    else
+        task.spawn(pcall, remote.InvokeServer, remote, unpack(args))
+end
+end
+function CreatePart(partType, cf, parent)
+    if not remote then return nil end
+    local worldCF = (origin + offset) * cf
+    local success, part = pcall(function() return remote:InvokeServer('CreatePart', partType, worldCF, parent) end)
+    return success and part or nil
+end
+function MovePart(part, cf) if not part then return end local worldCF = (origin + offset) * cf _({'SyncMove', {{['Part'] = part, ['CFrame'] = worldCF}}}) end
+function Resize(part, size, cf) if not part then return end local worldCF = (origin + offset) * cf _({'SyncResize', {{['Part'] = part, ['CFrame'] = worldCF, ['Size'] = size}}}) end
+function SetTrans(part, int) if not part then return end _({'SyncMaterial', {{['Part'] = part, ['Transparency'] = int}}}) end
+function Setmate(part, int) if not part then return end _({'SyncMaterial', {{['Part'] = part, ['Material'] = int}}}) end
+function Color(part, color) if not part then return end _({'SyncColor', {{['Part'] = part, ['Color'] = color, ['UnionColoring'] = false}}}) end
+function SetAnchor(boolean, part) if not part then return end _({'SyncAnchor', {{['Part'] = part, ['Anchored'] = boolean}}}) end
+function SetCollision(part, boolean) if not part then return end _({'SyncCollision', {{['Part'] = part, ['CanCollide'] = boolean}}}) end
+function AddMesh(part) if not part then return end _({'CreateMeshes', {{['Part'] = part}}}) end
+function SetMesh(part, meshid) if not part then return end _({'SyncMesh', {{['Part'] = part, ['MeshId'] = 'rbxassetid://' .. meshid}}}) end
+function SpawnDecal(part, side) if not part then return end _({'CreateTextures', {{['Part'] = part, ['Face'] = side, ['TextureType'] = 'Decal'}}}) end
+function AddDecal(part, asset, side) if not part then return end _({'SyncTexture', {{['Part'] = part, ['Face'] = side, ['TextureType'] = 'Decal', ['Texture'] = 'rbxassetid://' .. asset}}}) end
+function MeshResize(part, size) if not part then return end _({'SyncMesh', {{['Part'] = part, ['Scale'] = size}}}) end
+function SetName(part, stringg) if not part then return end _({'SetName', {part}, stringg}) end
+function vect(part, of) if not part then return end _({'SyncMesh', {{['Part'] = part, ['Offset'] = of}}}) end
+function reflect(part, int) if not part then return end _({'SyncMaterial', {{['Part'] = part, ['Reflectance'] = int}}}) end
+function SetMeshtype(part, type) if not part then return end _({'SyncMesh', {{['Part'] = part, ['MeshType'] = type}}}) end
+local generatedParts = {}
+task.wait(0.1)
+local partsToDelete = {}
+for _, v in ipairs(workspace:GetDescendants()) do
+    if v:IsA('BasePart') and v.Name ~= 'Terrain' then
+        local isPlrPart = false
+        for _, p in ipairs(game.Players:GetPlayers()) do
+            if p.Character and v:IsDescendantOf(p.Character) then
+                isPlrPart = true
+                break
+            end
+        end
+        if not isPlrPart then
+            table.insert(partsToDelete, v)
+        end
+    end
+end
+if #partsToDelete > 0 then
+    pcall(function() _({'Remove', partsToDelete}) end)
+end
+task.wait(0.5)
+function SetupPart(idx, partType, cf, size, name, color, mat, trans, refl, coll, anch)
+    generatedParts[idx] = CreatePart(partType, cf, workspace)
+    Resize(generatedParts[idx], size, cf)
+    SetName(generatedParts[idx], name)
+    Color(generatedParts[idx], color)
+    Setmate(generatedParts[idx], mat)
+    SetTrans(generatedParts[idx], trans)
+    reflect(generatedParts[idx], refl)
+    SetCollision(generatedParts[idx], coll)
+    SetAnchor(anch, generatedParts[idx])
+end
+task.wait(0.1)
+SetupPart(1, "Normal", CFrame.new(-65.167, 19.000, -429.903, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(462.000, 39.000, 503.000), "Part", Color3.new(0.388, 0.373, 0.384), Enum.Material.Concrete, 0.000, 0.000, true, true)
+SetupPart(2, "Spawn", CFrame.new(123.998, 38.500, -411.231, 0.000, 0.000, -1.000, 0.000, 1.000, 0.000, 1.000, 0.000, 0.000), Vector3.new(58.000, 1.000, 34.000), "SpawnLocation", Color3.new(1.000, 0.000, 0.000), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SpawnDecal(generatedParts[2], Enum.NormalId.Top)
+task.wait(0.15)
+AddDecal(generatedParts[2], "91069260052409", Enum.NormalId.Top)
+SetupPart(3, "Normal", CFrame.new(30.876, 45.500, -535.190, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(15.000, 15.000, 158.000), "Part", Color3.new(0.949, 0.953, 0.953), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(4, "Normal", CFrame.new(-206.951, 51.470, -427.085, 0.000, 0.000, -1.000, 0.000, 1.000, 0.000, 1.000, 0.000, 0.000), Vector3.new(5.000, 9.000, 5.000), "Part", Color3.new(0.067, 0.067, 0.067), Enum.Material.Plastic, 0.000, 0.000, false, true)
+SetupPart(5, "Normal", CFrame.new(-205.623, 43.604, -418.557, -0.021, -0.096, -0.995, 0.000, 0.995, -0.096, 1.000, -0.002, -0.021), Vector3.new(4.000, 9.000, 4.000), "Part", Color3.new(0.004, 0.031, 0.051), Enum.Material.Plastic, 0.000, 0.000, false, true)
+SetupPart(6, "Normal", CFrame.new(30.876, 45.500, -288.190, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(15.000, 15.000, 158.000), "Part", Color3.new(0.949, 0.953, 0.953), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(7, "Normal", CFrame.new(-103.624, 45.500, -217.690, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(284.000, 15.000, 17.000), "Part", Color3.new(0.949, 0.953, 0.953), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(8, "Normal", CFrame.new(-220.624, 74.500, -416.690, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(4.000, 73.000, 119.000), "Part", Color3.new(0.949, 0.953, 0.953), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(9, "Normal", CFrame.new(-99.124, 45.500, -606.690, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(275.000, 15.000, 15.000), "Part", Color3.new(0.949, 0.953, 0.953), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(10, "Normal", CFrame.new(30.753, 53.500, -467.105, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(14.000, 16.000, 13.000), "Part", Color3.new(1.000, 1.000, 0.000), Enum.Material.Glass, 0.000, 0.000, true, true)
+AddMesh(generatedParts[10])
+task.wait(0.15)
+SetMeshtype(generatedParts[10], Enum.MeshType.Sphere)
+MeshResize(generatedParts[10], Vector3.new(1.000, 1.000, 1.000))
+vect(generatedParts[10], Vector3.new(0.000, 0.000, 0.000))
+SetupPart(11, "Normal", CFrame.new(30.753, 53.500, -357.105, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(14.000, 16.000, 13.000), "Part", Color3.new(1.000, 1.000, 0.000), Enum.Material.Glass, 0.000, 0.000, true, true)
+AddMesh(generatedParts[11])
+task.wait(0.15)
+SetMeshtype(generatedParts[11], Enum.MeshType.Sphere)
+MeshResize(generatedParts[11], Vector3.new(1.000, 1.000, 1.000))
+vect(generatedParts[11], Vector3.new(0.000, 0.000, 0.000))
+SetupPart(12, "Normal", CFrame.new(-122.728, 64.500, -578.141, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(179.000, 53.000, 42.000), "Part", Color3.new(0.973, 0.973, 0.973), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(13, "Normal", CFrame.new(-160.991, 125.500, -418.715, 0.000, 0.000, -1.000, 0.000, 1.000, 0.000, 1.000, 0.000, 0.000), Vector3.new(133.000, 30.000, 139.000), "Part", Color3.new(0.639, 0.635, 0.647), Enum.Material.Plastic, 0.000, 0.000, true, true)
+AddMesh(generatedParts[13])
+task.wait(0.15)
+SetMeshtype(generatedParts[13], Enum.MeshType.Wedge)
+MeshResize(generatedParts[13], Vector3.new(1.000, 1.000, 1.000))
+vect(generatedParts[13], Vector3.new(0.000, 0.000, 0.000))
+SetupPart(14, "Normal", CFrame.new(91.140, 55.500, -454.908, 0.866, 0.000, -0.500, 0.000, 1.000, 0.000, 0.500, 0.000, 0.866), Vector3.new(1.000, 25.000, 43.000), "Part", Color3.new(0.639, 0.635, 0.647), Enum.Material.ForceField, 0.000, 0.000, true, true)
+SpawnDecal(generatedParts[14], Enum.NormalId.Right)
+task.wait(0.15)
+AddDecal(generatedParts[14], "92658511902181", Enum.NormalId.Right)
+SetupPart(15, "Normal", CFrame.new(-122.728, 64.500, -247.141, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(179.000, 53.000, 42.000), "Part", Color3.new(0.973, 0.973, 0.973), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(16, "Normal", CFrame.new(-163.519, 38.500, -416.861, 0.000, 0.000, 1.000, 0.000, 1.000, 0.000, -1.000, 0.000, 0.000), Vector3.new(116.000, 1.000, 115.000), "Part", Color3.new(0.459, 0.000, 0.000), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SpawnDecal(generatedParts[16], Enum.NormalId.Top)
+task.wait(0.15)
+AddDecal(generatedParts[16], "104311628516799", Enum.NormalId.Top)
+SetupPart(17, "Normal", CFrame.new(-207.085, 58.503, -420.067, -0.021, -0.035, -0.999, 0.000, 0.999, -0.035, 1.000, -0.001, -0.021), Vector3.new(7.000, 5.000, 5.000), "Part", Color3.new(0.004, 0.031, 0.051), Enum.Material.Plastic, 0.000, 0.000, true, true)
+AddMesh(generatedParts[17])
+task.wait(0.15)
+SetMeshtype(generatedParts[17], Enum.MeshType.Head)
+MeshResize(generatedParts[17], Vector3.new(1.250, 1.250, 1.250))
+vect(generatedParts[17], Vector3.new(0.000, 0.000, 0.000))
+SpawnDecal(generatedParts[17], Enum.NormalId.Front)
+task.wait(0.15)
+AddDecal(generatedParts[17], "rbxassetid://rbxasset://textures/face.png", Enum.NormalId.Front)
+SetupPart(18, "Normal", CFrame.new(-206.989, 51.467, -420.587, -0.021, -0.035, -0.999, 0.000, 0.999, -0.035, 1.000, -0.001, -0.021), Vector3.new(8.000, 9.000, 5.000), "Part", Color3.new(0.235, 0.231, 0.235), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SpawnDecal(generatedParts[18], Enum.NormalId.Front)
+task.wait(0.15)
+AddDecal(generatedParts[18], "1728369", Enum.NormalId.Front)
+SetupPart(19, "Normal", CFrame.new(-206.951, 51.470, -414.085, 0.000, 0.000, -1.000, 0.000, 1.000, 0.000, 1.000, 0.000, 0.000), Vector3.new(5.000, 9.000, 5.000), "Part", Color3.new(0.067, 0.067, 0.067), Enum.Material.Plastic, 0.000, 0.000, false, true)
+SetupPart(20, "Normal", CFrame.new(-206.623, 43.604, -422.557, -0.021, -0.096, -0.995, 0.000, 0.995, -0.096, 1.000, -0.002, -0.021), Vector3.new(4.000, 9.000, 4.000), "Part", Color3.new(0.004, 0.031, 0.051), Enum.Material.Plastic, 0.000, 0.000, false, true)
+SetupPart(21, "Normal", CFrame.new(3.607, 38.500, -413.078, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(221.000, 1.000, 26.000), "Part", Color3.new(0.973, 0.973, 0.973), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(22, "Normal", CFrame.new(-162.927, 74.500, -475.189, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(113.000, 73.000, 2.000), "Part", Color3.new(0.639, 0.635, 0.647), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(23, "Normal", CFrame.new(-162.927, 110.500, -417.189, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(113.000, 1.000, 118.000), "Part", Color3.new(0.639, 0.635, 0.647), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(24, "Normal", CFrame.new(-162.927, 74.500, -359.189, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(113.000, 73.000, 2.000), "Part", Color3.new(0.639, 0.635, 0.647), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(25, "Normal", CFrame.new(-105.927, 75.000, -379.689, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(3.000, 72.000, 43.000), "Part", Color3.new(0.639, 0.635, 0.647), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(26, "Normal", CFrame.new(-105.927, 75.000, -451.189, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(3.000, 72.000, 50.000), "Part", Color3.new(0.639, 0.635, 0.647), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(27, "Normal", CFrame.new(-105.927, 81.500, -410.689, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(3.000, 59.000, 93.000), "Part", Color3.new(0.639, 0.635, 0.647), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(28, "Normal", CFrame.new(-197.624, 58.000, -291.190, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(50.000, 40.000, 132.000), "Part", Color3.new(0.949, 0.953, 0.953), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(29, "Normal", CFrame.new(-183.124, 69.000, -291.190, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(79.000, 6.000, 132.000), "Part", Color3.new(0.949, 0.953, 0.953), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(30, "Normal", CFrame.new(-182.624, 66.500, -291.190, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(80.000, 1.000, 132.000), "Part", Color3.new(1.000, 1.000, 0.000), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(31, "Normal", CFrame.new(-197.624, 58.000, -537.690, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(50.000, 40.000, 123.000), "Part", Color3.new(0.949, 0.953, 0.953), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(32, "Normal", CFrame.new(-182.624, 66.500, -542.190, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(80.000, 1.000, 132.000), "Part", Color3.new(1.000, 1.000, 0.000), Enum.Material.Plastic, 0.000, 0.000, true, true)
+SetupPart(33, "Normal", CFrame.new(-183.124, 69.000, -542.190, 1.000, 0.000, 0.000, 0.000, 1.000, 0.000, 0.000, 0.000, 1.000), Vector3.new(79.000, 6.000, 132.000), "Part", Color3.new(0.949, 0.953, 0.953), Enum.Material.Plastic, 0.000, 0.000, true, true)
+if root then root.Anchored = false end
